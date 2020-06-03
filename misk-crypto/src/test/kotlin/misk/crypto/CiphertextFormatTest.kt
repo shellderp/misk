@@ -191,7 +191,6 @@ class CiphertextFormatTest {
 
   @Test
   fun testFromByteArrayV1WithBitmask() {
-    val context = mapOf("key" to "value")
     val aad = "key=value".toByteArray(Charsets.UTF_8)
     val output = ByteArrayOutputStream()
     output.write(1) // VERSION

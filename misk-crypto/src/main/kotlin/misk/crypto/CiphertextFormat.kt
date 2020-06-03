@@ -46,7 +46,7 @@ import java.security.GeneralSecurityException
  * [ tink ciphertext ]
  * ```
  *
- * For the full documentation of the [EncryptionPacket] serialization, read FORMAT.md
+ * For the full documentation of the [CiphertextFormat] serialization, read FORMAT.md
  */
 class CiphertextFormat private constructor() {
 
@@ -128,7 +128,7 @@ class CiphertextFormat private constructor() {
       val buffer = ByteBuffer.allocate(Short.MAX_VALUE.toInt())
       try {
         buffer.put(encodeVarInt(context.size))
-        context.toSortedMap().forEach { (k, v) ->
+        context.toSortedMap(compareBy { it }).forEach { (k, v) ->
           if (k.isEmpty() || v.isEmpty()) {
             throw InvalidEncryptionContextException("empty key or value")
           }
