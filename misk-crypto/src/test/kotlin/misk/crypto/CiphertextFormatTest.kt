@@ -10,7 +10,7 @@ import java.nio.ByteBuffer
 import java.util.UUID
 
 @MiskTest
-class EncryptionPacketTest {
+class CiphertextFormatTest {
 
   companion object {
     private const val VERSION_INDEX = 0

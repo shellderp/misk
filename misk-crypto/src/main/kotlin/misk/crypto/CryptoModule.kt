@@ -15,7 +15,7 @@ import com.google.crypto.tink.mac.MacConfig
 import com.google.crypto.tink.signature.SignatureConfig
 import com.google.inject.Singleton
 import com.google.inject.name.Names
-import misk.crypto.CiphertextFormat.InvalidEncryptionPacketFormatException
+import misk.crypto.CiphertextFormat.InvalidCiphertextFormatException
 import misk.inject.KAbstractModule
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
@@ -145,7 +145,7 @@ fun Aead.decrypt(ciphertext: ByteString, aad: ByteArray? = null): ByteString {
 fun Aead.decrypt(ciphertext : ByteString, encryptionContext: Map<String, String>?) : ByteString {
   val (payload, aad) = try {
     CiphertextFormat.deserialize(ciphertext.toByteArray(), encryptionContext)
-  } catch (e: InvalidEncryptionPacketFormatException) {
+  } catch (e: InvalidCiphertextFormatException) {
     Pair(ciphertext.toByteArray(), CiphertextFormat.serializeEncryptionContext(encryptionContext))
   }
   val decryptedBytes = this.decrypt(payload, aad)
@@ -214,7 +214,7 @@ fun DeterministicAead.decryptDeterministically(
   val bytes = ciphertext.toByteArray()
   val (payload, aad) = try {
     CiphertextFormat.deserialize(bytes, encryptionContext)
-  } catch(e: InvalidEncryptionPacketFormatException) {
+  } catch(e: InvalidCiphertextFormatException) {
     Pair(bytes, CiphertextFormat.serializeEncryptionContext(encryptionContext))
   }
   val decryptedBytes = this.decryptDeterministically(payload, aad ?: byteArrayOf())
@@ -260,7 +260,7 @@ fun HybridDecrypt.decrypt(
 ): ByteString {
   val (ciphertextBytes, aad) = try {
     CiphertextFormat.deserialize(ciphertext.toByteArray(), encryptionContext)
-  } catch (e: InvalidEncryptionPacketFormatException) {
+  } catch (e: InvalidCiphertextFormatException) {
     Pair(ciphertext.toByteArray(), CiphertextFormat.serializeEncryptionContext(encryptionContext))
   }
   val plaintextBytes = this.decrypt(ciphertextBytes, aad)

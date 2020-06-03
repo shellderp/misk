@@ -82,7 +82,7 @@ class CiphertextFormat private constructor() {
       val src = DataInputStream(ByteArrayInputStream(serialized))
       val version = src.readByte()
       if (version != CURRENT_VERSION.toByte()) {
-        throw InvalidEncryptionPacketFormatException("invalid version: $version")
+        throw InvalidCiphertextFormatException("invalid version: $version")
       }
       val aad: ByteArray?
       val ecSize = decodeVarInt(src)
@@ -222,11 +222,11 @@ class CiphertextFormat private constructor() {
       val src = DataInputStream(ByteArrayInputStream(serialized))
       val version = src.readByte().toInt()
       if (version != 1) {
-        throw InvalidEncryptionPacketFormatException("invalid version")
+        throw InvalidCiphertextFormatException("invalid version")
       }
       val bitmask = src.readInt()
       if (bitmask > Short.MAX_VALUE) {
-        throw InvalidEncryptionPacketFormatException("invalid bitmask")
+        throw InvalidCiphertextFormatException("invalid bitmask")
       }
       var context = mutableMapOf<String, String?>()
       var ciphertext : ByteArray? = null
@@ -265,7 +265,7 @@ class CiphertextFormat private constructor() {
         ciphertext = readCiphertext(src)
       }
       if (ciphertext == null) {
-        throw InvalidEncryptionPacketFormatException("no ciphertext found")
+        throw InvalidCiphertextFormatException("no ciphertext found")
       }
 
       return Pair(ciphertext, context)
@@ -311,7 +311,7 @@ class CiphertextFormat private constructor() {
     CUSTOMER_TOKEN(1 shl 8),
   }
 
-  class InvalidEncryptionPacketFormatException : GeneralSecurityException {
+  class InvalidCiphertextFormatException : GeneralSecurityException {
     constructor(message: String) : super(message)
     constructor(message: String, t: Throwable) : super(message, t)
   }
