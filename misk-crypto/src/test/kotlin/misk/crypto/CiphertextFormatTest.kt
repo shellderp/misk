@@ -31,6 +31,21 @@ class CiphertextFormatTest {
   }
 
   @Test
+  fun testEncryptionContextSerializationSortsKeys() {
+    val context = mapOf(
+        "table_name" to "unimportant",
+        "database_name" to "unimportant",
+        "key" to "value")
+    val context2 = linkedMapOf(
+        "key" to "value",
+        "database_name" to "unimportant",
+        "table_name" to "unimportant")
+
+    assertThat(CiphertextFormat.serializeEncryptionContext(context))
+        .isEqualTo(CiphertextFormat.serializeEncryptionContext(context2))
+  }
+
+  @Test
   fun testEncryptionContextSerializationWithVarInts() {
     val context = mutableMapOf<String, String>()
     (0..300).forEach { context["$it"] = UUID.randomUUID().toString() }
