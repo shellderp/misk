@@ -17,15 +17,15 @@ import java.security.GeneralSecurityException
  * This class introduces a new, higher level abstraction, that’ll be used instead of the
  * AAD byte array interfaces Tink exposes to users.
  * The main reasons to do this are:
- *   - Preventing the misuse of AAD
- *   - Preventing undecipherable ciphertext from being created
- *   - Exposing a user friendlier interface
+ * - Preventing the misuse of AAD
+ * - Preventing undecipherable ciphertext from being created
+ * - Exposing a user friendlier interface
  *
  * ## Encryption Context Specification
- *   - `Map<String, String>`
- *   - The map must contain at least 1 entry
- *   - No blank or empty strings in either the map's keys or values
- *   - The map is optional, and can be completely omitted from the encryption operation
+ * - `Map<String, String>`
+ * - The map must contain at least 1 entry
+ * - No blank or empty strings in either the map's keys or values
+ * - The map is optional, and can be completely omitted from the encryption operation
  * The encryption context will be serialized using the following format:
  * ```
  * [ AAD:
@@ -38,7 +38,7 @@ import java.security.GeneralSecurityException
  * ]
  * ```
  *
- * The final ouput will be serialized using the following format:
+ * The final output will be serialized using the following format:
  * ```
  * [ 0xEE: magic+version ]
  * [ varint: AAD length ]
