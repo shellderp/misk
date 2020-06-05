@@ -149,7 +149,8 @@ class CiphertextFormat private constructor() {
         throw InvalidEncryptionContextException("encryption context is too long", e)
       }
       val aad = ByteArray(buffer.position())
-      buffer.flip().get(aad)
+      buffer.flip()
+      buffer.get(aad)
       return aad
     }
 
@@ -159,12 +160,12 @@ class CiphertextFormat private constructor() {
         return null
       }
       val src = DataInputStream(ByteArrayInputStream(aad))
-      var entries = decodeVarInt(src)
+      val entries = decodeVarInt(src)
       if (entries == 0) {
         return null
       }
       val context = mutableMapOf<String, String>()
-      while(entries > 0) {
+      1.rangeTo(entries).forEach { _ ->
         val keySize = decodeVarInt(src)
         val keyBytes = ByteArray(keySize)
         src.readFully(keyBytes)
@@ -172,9 +173,7 @@ class CiphertextFormat private constructor() {
         val valueBytes = ByteArray(valueSize)
         src.readFully(valueBytes)
         context[keyBytes.toString(Charsets.UTF_8)] = valueBytes.toString(Charsets.UTF_8)
-        entries--
       }
-
       return context
     }
 
