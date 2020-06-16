@@ -6,7 +6,6 @@ import okhttp3.ConnectionPool
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
-import java.io.File
 import java.net.Proxy
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -56,10 +55,12 @@ class HttpClientFactory @Inject constructor(
     }
 
     config.clientConfig.protocols?.let {
-      builder.protocols(
-          config.clientConfig.protocols.map { Protocol.get(it) }
-              ?: listOf(Protocol.HTTP_1_1) //Safe default
-      )
+      val protocols = when {
+        config.clientConfig.protocols.isEmpty() -> listOf(Protocol.HTTP_1_1)
+        else -> config.clientConfig.protocols.map { Protocol.get(it) } // Safe default
+      }
+
+      builder.protocols(protocols)
     }
 
     config.envoy?.let {

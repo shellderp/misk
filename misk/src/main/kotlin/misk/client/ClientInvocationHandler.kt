@@ -39,6 +39,7 @@ internal class ClientInvocationHandler(
   private val clientName: String,
   retrofit: Retrofit,
   okHttpTemplate: OkHttpClient,
+  clientInterceptorFactories: Provider<List<ClientInterceptors.Factory>>,
   networkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>,
   applicationInterceptorFactories: Provider<List<ClientApplicationInterceptor.Factory>>,
   eventListenerFactory: EventListener.Factory?,
@@ -65,6 +66,10 @@ internal class ClientInvocationHandler(
     networkInterceptors.forEach {
       clientBuilder.addNetworkInterceptor(NetworkInterceptorWrapper(action, it))
     }
+
+    clientBuilder.interceptors()
+        .addAll(clientInterceptorFactories.get().mapNotNull { it.create(action) })
+
     if (eventListenerFactory != null) {
       clientBuilder.eventListenerFactory(eventListenerFactory)
     }
@@ -73,7 +78,9 @@ internal class ClientInvocationHandler(
     val retrofitBuilder = retrofit.newBuilder()
         .client(actionSpecificClient)
 
-    if (tracer != null) retrofitBuilder.callFactory(TracingCallFactory(actionSpecificClient, tracer))
+    if (tracer != null) {
+      retrofitBuilder.callFactory(TracingCallFactory(actionSpecificClient, tracer))
+    }
 
     val mediaTypes = getEndpointMediaTypes(methodName)
     if (mediaTypes.contains(MediaTypes.APPLICATION_PROTOBUF)) {

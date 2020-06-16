@@ -34,6 +34,7 @@ class TypedHttpClientModule<T : Any>(
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientNetworkInterceptor.Factory>()
     newMultibinder<ClientApplicationInterceptor.Factory>()
+    newMultibinder<ClientInterceptors.Factory>()
 
     // Install raw HTTP client support
     install(HttpClientModule(name, httpClientAnnotation))
@@ -100,6 +101,7 @@ class TypedPeerHttpClientModule<T : Any>(
     // Initialize empty sets for our multibindings.
     newMultibinder<ClientNetworkInterceptor.Factory>()
     newMultibinder<ClientApplicationInterceptor.Factory>()
+    newMultibinder<ClientInterceptors.Factory>()
 
     @Suppress("UNCHECKED_CAST")
     val key = Key.get(
@@ -140,6 +142,9 @@ class TypedClientFactory @Inject constructor() {
   // Use Providers for the interceptors so Guice can properly detect cycles when apps inject
   // an HTTP Client in an Interceptor.
   // https://gist.github.com/ryanhall07/e3eac6d2d47b72a4c37bce87219d7ced
+  @Inject
+  private lateinit var clientInterceptorFactories: Provider<List<ClientInterceptors.Factory>>
+
   @Inject
   private lateinit var clientNetworkInterceptorFactories: Provider<List<ClientNetworkInterceptor.Factory>>
 
@@ -197,7 +202,8 @@ class TypedClientFactory @Inject constructor() {
     baseUrl: String,
     kclass: KClass<T>,
     name: String,
-    retrofitBuilderProvider: Provider<Retrofit.Builder>?): T {
+    retrofitBuilderProvider: Provider<Retrofit.Builder>?
+  ): T {
     val retrofit = (retrofitBuilderProvider?.get() ?: Retrofit.Builder())
         .baseUrl(baseUrl)
         .build()
@@ -207,6 +213,7 @@ class TypedClientFactory @Inject constructor() {
         name,
         retrofit,
         client,
+        clientInterceptorFactories,
         clientNetworkInterceptorFactories,
         clientApplicationInterceptorFactories,
         eventListenerFactory,
