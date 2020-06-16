@@ -8,10 +8,24 @@ import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import java.io.File
 import java.net.Proxy
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.net.ssl.X509TrustManager
+
+
+private object Defaults {
+  /*
+    Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
+   */
+  val maxIdleConnections = 5
+
+  /*
+    Copied from okhttp3.ConnectionPool, as it does not provide "use default" option
+   */
+  val keepAliveDuration = Duration.ofMinutes(5)
+}
 
 @Singleton
 class HttpClientFactory @Inject constructor(
@@ -48,7 +62,7 @@ class HttpClientFactory @Inject constructor(
     }
 
     config.clientConfig.unixSocketFile?.let {
-      builder.socketFactory(UnixDomainSocketFactory(it))
+      builder.socketFactory(UnixDomainSocketFactory(File(it)))
       // No DNS lookup needed since we're just sending the request over a socket.
       builder.dns(NoOpDns)
       // Proxy config not supported
@@ -58,7 +72,6 @@ class HttpClientFactory @Inject constructor(
     config.clientConfig.protocols?.let {
       builder.protocols(
           config.clientConfig.protocols.map { Protocol.get(it) }
-              ?: listOf(Protocol.HTTP_1_1) //Safe default
       )
     }
 
@@ -74,13 +87,17 @@ class HttpClientFactory @Inject constructor(
     }
 
     val dispatcher = Dispatcher()
-    dispatcher.maxRequests = config.clientConfig.maxRequests
-    dispatcher.maxRequestsPerHost = config.clientConfig.maxRequestsPerHost
+    config.clientConfig.maxRequests?.let { maxRequests ->
+      dispatcher.maxRequests = maxRequests
+    }
+    config.clientConfig.maxRequestsPerHost?.let { maxRequestsPerHost ->
+      dispatcher.maxRequestsPerHost = maxRequestsPerHost
+    }
     builder.dispatcher(dispatcher)
 
     val connectionPool = ConnectionPool(
-        config.clientConfig.maxIdleConnections,
-        config.clientConfig.keepAliveDuration.toMillis(),
+        config.clientConfig.maxIdleConnections ?: Defaults.maxIdleConnections,
+        (config.clientConfig.keepAliveDuration?:Defaults.keepAliveDuration).toMillis(),
         TimeUnit.MILLISECONDS)
     builder.connectionPool(connectionPool)
 
