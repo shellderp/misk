@@ -31,6 +31,6 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - name: Publish packages
         #if: github.repository == 'cashapp/misk'
-        run: ./gradlew -x samples:exemplar:publish -x samples:exemplarchat:publish -Dorg.gradle.internal.publish.checksums.insecure
+        run: ./gradlew -x samples:exemplar:publish -x samples:exemplarchat:publish -Dorg.gradle.internal.publish.checksums.insecure uploadArchives
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
